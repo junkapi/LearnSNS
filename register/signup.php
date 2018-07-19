@@ -2,9 +2,21 @@
     session_start();
 
 
+
+
     date_default_timezone_set('Asia/Manila');
 
     $errors = [];
+
+
+    if (isset($_GET['action']) && $_GET['action'] == 'rewrite') {
+        $_POST['input_name'] = $_SESSION['register']['name'];
+        $_POST['input_email'] = $_SESSION['register']['email'];
+        $_POST['input_password'] = $_SESSION['register']['password'];
+
+        $errors['rewrite'] = true;
+    }
+
 
 
     if (!empty($_POST)) {
@@ -22,6 +34,7 @@
             $errors['email'] = 'blank';
         }
 
+
         $count = strlen($password);
         if ($password == '') {
             $errors['password'] = 'blank';
@@ -29,7 +42,13 @@
             $errors['password'] = 'length';
         }
 
-        $file_name = $_FILES['input_img_name']['name'];
+
+        $file_name = '';
+        if (!isset($_GET['action'])) {
+            $file_name = $_FILES['input_img_name']['name'];
+        }
+
+
         if (!empty($file_name)) {
            $file_type = substr($file_name, -3);  //画像名の後ろから３文字を取得
            $file_type = strtolower($file_type);  //大文字が含まれていた場合全て小文字化
@@ -38,8 +57,8 @@
            }
            } else {
                 $errors['img_name'] = 'blank';
-        
         }
+
 
         if (empty($errors)) {
             //$errorsが空だった場合はバリデーション成功
