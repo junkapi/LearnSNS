@@ -4,6 +4,7 @@
 
 
 
+
     date_default_timezone_set('Asia/Manila');
 
     $name = '';
@@ -129,6 +130,9 @@
                             <?php endif; ?>
                             <?php if (isset($errors['password']) && $errors['password'] =='blank'): ?>
                                 <p class="text-danger">パスワードを入力してください</p>
+                            <?php endif; ?>
+                            <?php if(!empty($errors)): ?>
+                                <p class="text-danger">パスワードを再度入力してください</p>
                             <?php endif; ?>
 
                         </div>
