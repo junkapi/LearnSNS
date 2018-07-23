@@ -4,12 +4,32 @@
 
   require('dbconnect.php');
 
+
+  $errors = array();
+
+
   $sql = 'SELECT * FROM  `users` WHERE `id` = ?';
   $data = array($_SESSION['id']);
   $stmt = $dbh->prepare($sql);
   $stmt->execute($data);
 
   $signin_user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if (!empty($_POST)) {
+      $feed = $_POST['feed'];
+    
+
+    if ($feed == '') {
+      $errors['feed'] = 'blank';
+
+    }
+
+
+  $sql = 'INSERT INTO `feeds` '
+
+
+
+  }
 
 
 ?>
@@ -72,6 +92,9 @@
           <form method="POST" action="">
             <div class="form-group">
               <textarea name="feed" class="form-control" rows="3" placeholder="Happy Hacking!" style="font-size: 24px;"></textarea><br>
+              <?php if (isset($errors['feed']) && ($errors['feed']) == 'blank'): ?>
+                  <p class="alert alert-danger">投稿データを入力してください</p>
+                <?php endif; ?>
             </div>
             <input type="submit" value="投稿する" class="btn btn-primary">
           </form>
@@ -88,7 +111,7 @@
             </div>
             <div class="row feed_content">
               <div class="col-xs-12" >
-                <span style="font-size: 24px;">夢は逃げない。逃げるのはいつも自分だ。</span>
+                <span style="font-size: 24px;"><</span>
               </div>
             </div>
             <div class="row feed_sub">
