@@ -7,5 +7,5 @@
     // SQL文にエラーがあった際、画面にエラーを出力する設定
     $dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $dbh->query('SET NAMES utf8');
+
     
-?>
