@@ -5,6 +5,12 @@
   require('dbconnect.php');
 
 
+  if(!isset($_SESSION['register'])) {
+    header('Location:signup.php');
+    exit();
+  }
+
+
   $errors = array();
 
 
@@ -19,17 +25,30 @@
       $feed = $_POST['feed'];
     
 
-    if ($feed == '') {
+    if ($feed !='') {
+
+      $sql = 'INSERT INTO `feeds` SET `feed`=?, `user_id`=?, `created`=NOW()';
+      $data = array($feed, $signin_user['id']);
+      $stmt = $dbh->prepare($sql);
+      $stmt->execute($data);
+
+
+      header('Location: timeline.php');
+      exit();
+
+
+    }else {
+
       $errors['feed'] = 'blank';
+    }
+
+
 
     }
 
 
-  $sql = 'INSERT INTO `feeds` '
 
-
-
-  }
+  
 
 
 ?>
