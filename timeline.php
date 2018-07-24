@@ -5,7 +5,7 @@
   require('dbconnect.php');
 
 
-  if(!isset($_SESSION['register'])) {
+  if(!isset($_SESSION['id'])) {
     header('Location:signup.php');
     exit();
   }
@@ -46,6 +46,22 @@
 
     }
 
+
+    $sql = 'SELECT `feeds`.*, `users`.`name`, `users`.`img_name` FROM `feeds` RIGHT JOIN `users` ON `feeds`.`user_id` = `users`.id ORDER BY `created` DESC';
+    $stmt = $dbh->prepare($sql);
+    $stmt->execute();
+
+
+    $feeds = array();
+    while (1) {
+    // データを１件ずつ取得
+        $rec = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($rec == false) {
+           break;
+        }
+
+         $feeds[] = $rec;
+    }
 
 
   
@@ -118,19 +134,21 @@
             <input type="submit" value="投稿する" class="btn btn-primary">
           </form>
         </div>
+
+        <?php  foreach ($feeds as $fed): ?>
           <div class="thumbnail">
             <div class="row">
               <div class="col-xs-1">
-                <img src="https://placehold.jp/40x40.png" width="40">
+                <img src="user_profile_img/<?php echo $fed['img_name']; ?>" width="40">
               </div>
               <div class="col-xs-11">
-                野原ひろし<br>
-                <a href="#" style="color: #7F7F7F;">2018-03-03</a>
+                <?php echo $fed['name']; ?><br>
+                <a href="#" style="color: #7F7F7F;"><?php echo $fed['created']; ?></a>
               </div>
             </div>
             <div class="row feed_content">
               <div class="col-xs-12" >
-                <span style="font-size: 24px;"><</span>
+                <span style="font-size: 24px;"><</span><?php echo $fed['feed']; ?>
               </div>
             </div>
             <div class="row feed_sub">
@@ -147,6 +165,9 @@
               </div>
             </div>
           </div>
+          <?php endforeach; ?>
+
+
         <div aria-label="Page navigation">
           <ul class="pager">
             <li class="previous disabled"><a href="#"><span aria-hidden="true">&larr;</span> Newer</a></li>
