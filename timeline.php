@@ -5,6 +5,10 @@
   require('dbconnect.php');
 
 
+  const CONTENT_PER_PAGE = 5;
+
+
+
   if(!isset($_SESSION['id'])) {
     header('Location:signup.php');
     exit();
@@ -21,6 +25,18 @@
 
   $signin_user = $stmt->fetch(PDO::FETCH_ASSOC);
 
+
+// 何ページ目を開いているか取得する
+  if (isset($_GET['page'])) {
+    $page = $_GET['page'];
+
+  } else {
+    $page = 1;
+
+  }
+
+
+// ユーザーが投稿ボタンを押したら発動
   if (!empty($_POST)) {
       $feed = $_POST['feed'];
     
@@ -47,7 +63,32 @@
     }
 
 
-    $sql = 'SELECT `feeds`.*, `users`.`name`, `users`.`img_name` FROM `feeds` RIGHT JOIN `users` ON `feeds`.`user_id` = `users`.id ORDER BY `created` DESC';
+
+    // -1などのページ数として不正な値を渡された場合の対策
+    $page = max($page, 1);
+
+
+    // ヒットしたレコードの数を取得するSQL
+    $sql_count = "SELECT COUNT(*) AS `cnt` FROM `feeds`";
+    $stmt_count = $dbh->prepare($sql_count);
+    $stmt_count->execute();
+
+    $record_cnt = $stmt_count->fetch(PDO::FETCH_ASSOC);
+
+
+    // 取得したページ数を１ページあたりに表示する件数で割って何ページが最後になるか取得
+    $last_page = ceil($record_cnt['cnt']/CONTENT_PER_PAGE);
+
+
+    // 最後のページより大きい値を渡された場合の対策
+    $page = min($page, $last_page);
+
+
+    $start = ($page - 1)*CONTENT_PER_PAGE;
+
+
+
+    $sql = 'SELECT `feeds`.*, `users`.`name`, `users`.`img_name` FROM `feeds` RIGHT JOIN `users` ON `feeds`.`user_id` = `users`.id ORDER BY `created` DESC LIMIT '. CONTENT_PER_PAGE .' OFFSET ' . $start;
     $stmt = $dbh->prepare($sql);
     $stmt->execute();
 
@@ -170,8 +211,17 @@
 
         <div aria-label="Page navigation">
           <ul class="pager">
-            <li class="previous disabled"><a href="#"><span aria-hidden="true">&larr;</span> Newer</a></li>
-            <li class="next"><a href="#">Older <span aria-hidden="true">&rarr;</span></a></li>
+            <?php if($page == 1): ?>
+            <li class="previous disabled"><a><span aria-hidden="true">&larr;</span></a></li>
+            <?php else: ?>
+            <li class="previous"><a href="timeline.php?page=<?php echo $page- 1;?>"><span aria-hidden="true">&larr;</span> Newer</a></li>
+            <?php endif; ?>
+
+            <?php if($page == $last_page): ?>
+            <li class="next disabled"><a>Older <span aria-hidden="true">&rarr;</span></a></li>
+            <?php else: ?>
+            <li class="next"><a href="timeline.php?page=<?php echo $page +1;?>">Older <span aria-hidden="true">&rarr;</span></a></li>
+          <?php endif; ?>
           </ul>
         </div>
       </div>
