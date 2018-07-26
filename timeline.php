@@ -5,6 +5,8 @@
   require('dbconnect.php');
 
 
+// 特に変える必要がないから定数を定義
+// 定数は分かりやすいように大文字にする
   const CONTENT_PER_PAGE = 5;
 
 
@@ -201,8 +203,10 @@
                 </form>
                 <span class="like_count">いいね数 : 100</span>
                 <span class="comment_count">コメント数 : 9</span>
-                  <a href="#" class="btn btn-success btn-xs">編集</a>
-                  <a href="#" class="btn btn-danger btn-xs">削除</a>
+                <?php if($fed["user_id"]==$_SESSION["id"]): ?>
+                  <a href="edit.php?feed_id=<?php echo $fed["id"] ?>" class="btn btn-success btn-xs">編集</a>
+                  <a onclick="return confilm('ほんとに消すの？');" href="delete.php?feed_id=<?php echo $fed["id"] ?>" class="btn btn-danger btn-xs">削除</a>
+                <?php endif; ?>
               </div>
             </div>
           </div>
