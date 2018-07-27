@@ -1,5 +1,6 @@
 <?php
 jijiji
+yuyuyu
     session_start();
 
     require_once('../dbconnect.php');
