@@ -1,6 +1,8 @@
 <?php
 jijiji
-mamama
+
+yuyuyu
+
     session_start();
 
     require_once('../dbconnect.php');
