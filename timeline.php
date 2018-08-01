@@ -112,6 +112,42 @@
            break;
         }
 
+
+        //いいね済みかどうかの確認
+        $like_flg_sql = "SELECT * FROM `likes` WHERE `user_id` = ? AND `feed_id` = ?";
+
+        $like_flg_data = [$signin_user['id'], $rec["id"]];
+
+        $like_flg_stmt = $dbh->prepare($like_flg_sql);
+        $like_flg_stmt->execute($like_flg_data);
+
+        $is_liked = $like_flg_stmt->fetch(PDO::FETCH_ASSOC);
+
+        //三項演算子　条件式　? trueだった場合 : falseだった場合
+        $rec["is_liked"] = $is_liked ? true : false;
+
+        //↑と同じ意味
+        // if ($is_liked) {
+        //   $rec["is_liked"] = true
+        // } else {
+        //   $rec["is_liked"] = false
+        // }
+
+
+        //何件いいねざれているか確認
+        $like_sql = "SELECT COUNT(*) AS `like_cnt` FROM `likes` WHERE `feed_id` = ?";
+
+        $like_data = [$rec["id"]];
+
+        $like_stmt = $dbh->prepare($like_sql);
+        $like_stmt->execute($like_data);
+
+        $like = $like_stmt->fetch(PDO::FETCH_ASSOC);
+
+        $rec["like_cnt"] = $like["like_cnt"];
+
+
+
          $feeds[] = $rec;
     }
 
@@ -206,13 +242,19 @@
             </div>
             <div class="row feed_sub">
               <div class="col-xs-12">
-                <span hidden class="feed-id"><?=$fed["id"]?></span>
+                <?php if ($fed['is_liked']): ?>
+                  <button class="btn btn-default btn-xs js-unlike">
+                    <i class="fa fa-thumbs-up" aria-hidden="true"></i>
+                    <span>いいねを取り消す</span>
+                  </button>
+                <?php else: ?>
                 <button class="btn btn-default btn-xs js-like">
                     <i class="fa fa-thumbs-up" aria-hidden="true"></i>
                     <span>いいね！</span>
                 </button>
+                <?php endif; ?>
                 <span>いいね数 : </span>
-                <span class="like_count">100</span>
+                <span class="like_count"><?= $fed['like_cnt'] ?></span>
                 <span class="comment_count">コメント数 : 9</span>
                 <?php if($fed["user_id"]==$_SESSION["id"]): ?>
                   <a href="edit.php?feed_id=<?php echo $fed["id"] ?>" class="btn btn-success btn-xs">編集</a>
