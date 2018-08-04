@@ -3,11 +3,22 @@
   session_start();
 
   require('dbconnect.php');
+  require('function.php');
 
 
 // 特に変える必要がないから定数を定義
 // 定数は分かりやすいように大文字にする
   const CONTENT_PER_PAGE = 5;
+
+  $signin_user = get_user($dbh, $_SESSION['id']);
+
+  // create_feed($dbh, $feed, $signin_user['id']);
+
+  // $rec["like_cnt"] = $like["like_cnt"];
+
+  // $rec["is_liked"] = is_liked($dbh,$signin_user['id'],$rec["id"]);
+
+  // $last_page = get_last_page($dbh);
 
 
 
@@ -19,13 +30,6 @@
 
   $errors = array();
 
-
-  $sql = 'SELECT * FROM  `users` WHERE `id` = ?';
-  $data = array($_SESSION['id']);
-  $stmt = $dbh->prepare($sql);
-  $stmt->execute($data);
-
-  $signin_user = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
 // 何ページ目を開いているか取得する
@@ -45,10 +49,12 @@
 
     if ($feed !='') {
 
-      $sql = 'INSERT INTO `feeds` SET `feed`=?, `user_id`=?, `created`=NOW()';
-      $data = array($feed, $signin_user['id']);
-      $stmt = $dbh->prepare($sql);
-      $stmt->execute($data);
+      // $sql = 'INSERT INTO `feeds` SET `feed`=?, `user_id`=?, `created`=NOW()';
+      // $data = array($feed, $signin_user['id']);
+      // $stmt = $dbh->prepare($sql);
+      // $stmt->execute($data);
+
+      create_feed($dbh, $feed, $signin_user['id']);
 
 
       header('Location: timeline.php');
@@ -71,15 +77,17 @@
 
 
     // ヒットしたレコードの数を取得するSQL
-    $sql_count = "SELECT COUNT(*) AS `cnt` FROM `feeds`";
-    $stmt_count = $dbh->prepare($sql_count);
-    $stmt_count->execute();
+    // $sql_count = "SELECT COUNT(*) AS `cnt` FROM `feeds`";
+    // $stmt_count = $dbh->prepare($sql_count);
+    // $stmt_count->execute();
 
-    $record_cnt = $stmt_count->fetch(PDO::FETCH_ASSOC);
+    // $record_cnt = $stmt_count->fetch(PDO::FETCH_ASSOC);
 
 
-    // 取得したページ数を１ページあたりに表示する件数で割って何ページが最後になるか取得
-    $last_page = ceil($record_cnt['cnt']/CONTENT_PER_PAGE);
+    // // 取得したページ数を１ページあたりに表示する件数で割って何ページが最後になるか取得
+    // $last_page = ceil($record_cnt['cnt']/CONTENT_PER_PAGE);
+
+    $last_page = get_last_page($dbh);
 
 
     // 最後のページより大きい値を渡された場合の対策
@@ -114,17 +122,17 @@
 
 
         //いいね済みかどうかの確認
-        $like_flg_sql = "SELECT * FROM `likes` WHERE `user_id` = ? AND `feed_id` = ?";
+        // $like_flg_sql = "SELECT * FROM `likes` WHERE `user_id` = ? AND `feed_id` = ?";
 
-        $like_flg_data = [$signin_user['id'], $rec["id"]];
+        // $like_flg_data = [$signin_user['id'], $rec["id"]];
 
-        $like_flg_stmt = $dbh->prepare($like_flg_sql);
-        $like_flg_stmt->execute($like_flg_data);
+        // $like_flg_stmt = $dbh->prepare($like_flg_sql);
+        // $like_flg_stmt->execute($like_flg_data);
 
-        $is_liked = $like_flg_stmt->fetch(PDO::FETCH_ASSOC);
+        // $is_liked = $like_flg_stmt->fetch(PDO::FETCH_ASSOC);
 
-        //三項演算子　条件式　? trueだった場合 : falseだった場合
-        $rec["is_liked"] = $is_liked ? true : false;
+        // //三項演算子　条件式　? trueだった場合 : falseだった場合
+        // $rec["is_liked"] = $is_liked ? true : false;
 
         //↑と同じ意味
         // if ($is_liked) {
@@ -133,18 +141,23 @@
         //   $rec["is_liked"] = false
         // }
 
+        $rec["is_liked"] = is_liked($dbh,$signin_user['id'],$rec["id"]);
 
-        //何件いいねざれているか確認
-        $like_sql = "SELECT COUNT(*) AS `like_cnt` FROM `likes` WHERE `feed_id` = ?";
 
-        $like_data = [$rec["id"]];
 
-        $like_stmt = $dbh->prepare($like_sql);
-        $like_stmt->execute($like_data);
+        // //何件いいねされているか確認
+        // $like_sql = "SELECT COUNT(*) AS `like_cnt` FROM `likes` WHERE `feed_id` = ?";
 
-        $like = $like_stmt->fetch(PDO::FETCH_ASSOC);
+        // $like_data = [$rec["id"]];
 
-        $rec["like_cnt"] = $like["like_cnt"];
+        // $like_stmt = $dbh->prepare($like_sql);
+        // $like_stmt->execute($like_data);
+
+        // $like = $like_stmt->fetch(PDO::FETCH_ASSOC);
+
+        // $rec["like_cnt"] = $like["like_cnt"];
+
+        $rec["like_cnt"] = count_like($dbh, $rec["id"]);
 
 
 
