@@ -76,3 +76,9 @@
     }
 
 
+// つぶやき数を取得
+    function count_feed($dbh, $feed_id);
+    {
+      
+    }
+
