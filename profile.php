@@ -6,7 +6,12 @@
     require('dbconnect.php');
     require('function.php');
 
+
     $signin_user = get_user($dbh, $_SESSION["id"]);
+
+    $profile_user = get_user($dbh, $_GET['user_id']);
+
+    $is_followed = is_followed($dbh, $profile_user["id"], $signin_user["id"]);
 
 
 
@@ -26,9 +31,15 @@
     <div class="container">
         <div class="row">
             <div class="col-xs-3 text-center">
-                <img src="user_profile_img/" class="img-thumbnail" />
-                <h2>{ ユーザー名 }</h2>
-                <a href="follow.php?following_id="><button class="btn btn-default btn-block">フォローする</button></a>
+                <img src="user_profile_img/<?= $profile_user['img_name'] ?>" class="img-thumbnail" />
+                <h2><?php echo $profile_user["name"];?></h2>
+                <?php if ($signin_user['id'] !=$profile_user['id']): ?>
+                    <?php if ($is_followed): ?>
+                        <a href="follow.php?following_id=<?= $profile_user["id"]; ?>&unfollow"><button class="btn btn-default btn-block">フォロー解除する</button></a>
+                        <?php else: ?>
+                            <a href="follow.php?following_id=<?php echo $profile_user["id"]; ?>"> <button class="btn btn-default btn-block">フォローする</button></a>
+                        <?php endif; ?>
+                    <?php endif; ?>
             </div>
 
             <div class="col-xs-9">
