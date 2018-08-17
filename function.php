@@ -105,3 +105,81 @@
       return $is_followed ? true : false;
     }
 
+
+    // フォロワー一覧表示
+    function get_follower($dbh, $user_id)
+    {
+      $sql = 'SELECT u.* FROM followers fw JOIN users u ON fw.follower_id = u.id WHERE fw.user_id = ?';
+
+      $data = array($user_id);
+      $stmt = $dbh->prepare($sql);
+      $stmt->execute($data);
+
+      $follower = [];
+      while (true) {
+        $rec = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($rec == false) break;
+
+        $follower[] = $rec;
+      }
+
+      return $follower;
+    }
+
+
+    // 開いているページのユーザーがフォローしているユーザーのフォロー一覧
+    function get_following($dbh, $user_id)
+    {
+      $sql = 'SELECT u.* FROM followers fw JOIN users u ON fw.user_id = u.id WHERE fw.user_id=?';
+
+      $data = array($user_id);
+      $stmt = $dbh->prepare($sql);
+      $stmt->execute($data);
+
+      $followings = [];
+      while (true) {
+        $rec = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($rec == false) break;
+
+        $followings[] = $rec;
+      }
+
+      return $followings;
+    }
+
+
+    // コメント取得
+    function get_comment($dbh, $feed_id)
+    {
+      $sql = "SELECT `c`.*, `u`.`name`, `u`.`img_name` FROM `comments` AS `c` JOIN `users` AS `u` ON `c`.`user_id` = `u`.`id` WHERE `feed_id` = ?";
+
+      $data = [$feed_id];
+      $stmt = $dbh->prepare($sql);
+      $stmt->execute($data);
+
+      $comments = [];
+
+      while(true) {
+        $comment = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($comment == false) break;
+
+        $comments[] = $comment;
+      }
+      return $comments;
+    }
+
+
+    // コメント数取得
+    function count_comment($dbh, $feed_id)
+    {
+      $sql = "SELECT COUNT(*) AS `comment_cnt` FROM `comments` WHERE `feed_id` = ?";
+
+      $data = [$feed_id];
+      $stmt = $dbh->prepare($sql);
+      $stmt->execute($data);
+
+      $comment = $stmt->fetch(PDO::FETCH_ASSOC);
+
+      return $comment["comment_cnt"];
+    }
